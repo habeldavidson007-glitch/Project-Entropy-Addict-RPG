@@ -207,7 +207,7 @@ func _show_encounter(enemies: Array) -> void:
 	await get_tree().create_timer(1.0).timeout
 	encounter_panel.hide()
 	CombatManager.start_combat(enemies)
-	get_tree().change_scene_to_file("res://scenes/ui/combat_ui.tscn")
+	get_tree().change_scene_to_file("res://scripts/ui/combat_ui.tscn")
 
 
 func _on_combat_ended(victory: bool) -> void:
@@ -215,7 +215,7 @@ func _on_combat_ended(victory: bool) -> void:
 		GameState.save()
 	else:
 		# On death — return to menu, save is preserved for retry
-		get_tree().change_scene_to_file("res://scenes/main/main_menu.tscn")
+		get_tree().change_scene_to_file("res://scripts/ui/main_menu.tscn")
 
 
 func _talk_to_npc(npc_name: String, area: Dictionary) -> void:

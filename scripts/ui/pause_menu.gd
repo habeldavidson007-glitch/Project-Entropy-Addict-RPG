@@ -71,7 +71,7 @@ func _on_save() -> void:
 func _on_quit() -> void:
 	GameState.save()
 	get_tree().paused = false
-	get_tree().change_scene_to_file("res://scenes/main/main_menu.tscn")
+	get_tree().change_scene_to_file("res://scripts/ui/main_menu.tscn")
 	quit_to_menu.emit()
 
 
