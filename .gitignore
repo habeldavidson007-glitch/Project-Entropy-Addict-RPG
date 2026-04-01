@@ -1,6 +1,32 @@
-.godot/ 
-*.import 
-export.cfg 
-exports/ 
-cache/ 
-.DS_Store 
+# Godot 4 — auto-generated temp files
+.godot/
+*.translation
+
+# Import metadata (regenerated on project open)
+*.import
+
+# Export configs and output
+export.cfg
+export_presets.cfg
+exports/
+
+# Cached AI responses (runtime only)
+cache/
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor backups
+*.bak
+*.swp
+*~
+
+# Python (if any tooling)
+__pycache__/
+*.pyc
+*.pyo
+
+# Logs
+*.log
