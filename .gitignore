@@ -1,0 +1,6 @@
+.godot/ 
+*.import 
+export.cfg 
+exports/ 
+cache/ 
+.DS_Store 
