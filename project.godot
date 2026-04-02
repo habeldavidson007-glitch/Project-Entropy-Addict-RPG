@@ -19,7 +19,6 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-AiManager="*uid://dcmuy3e8dk7ql"
 GameState="*res://scripts/globals/game_state.gd"
 AIManager="*res://scripts/ai/ai_manager.gd"
 CombatManager="*res://scripts/system/combat_manager.gd"

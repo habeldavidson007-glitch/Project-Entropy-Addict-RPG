@@ -1,9 +1,10 @@
 ```
 # Godot-specific ignores
 *.import
-*.remap
+*.uid
 export_presets.cfg
-.autoload_register
-.editor/
-.godot/
+.rsync-filter
+GodotSharp/
+mono_crash.*
+user://*
 ```

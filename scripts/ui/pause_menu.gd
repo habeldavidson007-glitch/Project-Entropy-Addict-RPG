@@ -40,7 +40,7 @@ func _open() -> void:
 
 
 func _refresh_info() -> void:
-	var p := GameState.player
+	var p: Dictionary = GameState.player
 	player_info_label.text = "%s  ·  Lv.%d  ·  Day %d\nHP %d/%d  ·  Entropy %d%%" % [
 		p["name"], p["level"], GameState.world["day"],
 		p["hp"], p["hp_max"],

@@ -95,7 +95,7 @@ func _enter_area(area_key: String) -> void:
 		return
 	current_area_key = area_key
 	GameState.world["current_area"] = area_key
-	var area := AREAS[area_key]
+	var area: Dictionary = AREAS[area_key]
 	area_name_label.text = area["name"]
 	area_desc_label.text = "..."
 	_build_action_buttons(area)
@@ -132,7 +132,7 @@ func _build_action_buttons(area: Dictionary) -> void:
 	for connected_key in area["connections"]:
 		if not AREAS.has(connected_key):
 			continue
-		var dest := AREAS[connected_key]
+		var dest: Variant = AREAS[connected_key]
 		var btn := Button.new()
 		btn.text = "→ %s  [%s]" % [dest["name"], dest["danger"]]
 		btn.pressed.connect(func(): _travel_to(connected_key))

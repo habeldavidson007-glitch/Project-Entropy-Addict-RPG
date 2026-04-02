@@ -67,11 +67,13 @@ func _check_interactions() -> void:
 	if is_interacting:
 		return
 	
+	var body: CharacterBody2D
 	for body in interaction_area.get_overlapping_bodies():
 		if body.is_in_group("interactables") or body.has_method("interact"):
 			current_interaction_target = body
 			return
 	
+	var area: Area2D
 	for area in interaction_area.get_overlapping_areas():
 		if area.is_in_group("interactables") or area.has_method("interact"):
 			current_interaction_target = area

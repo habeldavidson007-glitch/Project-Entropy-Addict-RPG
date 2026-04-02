@@ -167,10 +167,10 @@ func _process_queue() -> void:
 	ai_busy_changed.emit(true)
 	
 	_active_request = _request_queue.pop_front()
-	_send_request(_active_request.prompt, _active_request.cache_key)
+	_send_request(_active_request.prompt)
 
 
-func _send_request(prompt: String, cache_key: String) -> void:
+func _send_request(prompt: String) -> void:
 	var body_dict: Dictionary = {
 		"model": MODEL_NAME,
 		"prompt": prompt,
