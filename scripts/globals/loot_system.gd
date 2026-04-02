@@ -1,228 +1,129 @@
 extends Node
 
-## GameState — Autoload singleton
-## Holds all persistent game data: player, world state, flags, progress
-## Saves/loads to disk automatically with optimized serialization
+## LootSystem — Autoload singleton
+## Generates random loot based on region and difficulty.
+## Add to Project Settings > Autoload as "LootSystem"
 
-signal player_level_changed(old_level: int, new_level: int)
-signal player_died
-signal game_saved
-signal game_loaded
-signal flag_set(flag_name: String, value: Variant)
+signal loot_generated(item: Dictionary)
 
-const SAVE_PATH: String = "user://save_data.json"
-const VERSION: String = "1.0.0"
+# ── Loot Tables ───────────────────────────────────────────────────────────────
 
-# ─── Player Data ──────────────────────────────────────────────────────────────
-
-var player: Dictionary = {
-	"name": "Survivor",
-	"level": 1,
-	"xp": 0,
-	"xp_to_next": 100,
-	"hp": 100,
-	"hp_max": 100,
-	"mp": 50,
-	"mp_max": 50,
-	"str": 5,
-	"agi": 5,
-	"int": 5,
-	"vit": 5,
-	"entropy": 0,
-	"entropy_max": 100,
-	"gold": 0,
-	"inventory": [],
-	"equipped": {},
-	"skills": [],
-	"status_effects": [],
-	"location": "prologue",
-	"total_kills": 0,
-	"total_deaths": 0,
+const LOOT_TABLES = {
+	"ashveld_flats": [
+		{"name": "Rusty Dagger", "type": "weapon", "rarity": "common", "value": 5, "min_dmg": 2, "max_dmg": 4},
+		{"name": "Tattered Cloth", "type": "material", "rarity": "common", "value": 2},
+		{"name": "Small Health Potion", "type": "consumable", "rarity": "uncommon", "value": 10, "heal": 20},
+		{"name": "Wolf Pelt", "type": "material", "rarity": "common", "value": 3},
+		{"name": "Iron Shard", "type": "material", "rarity": "common", "value": 1}
+	],
+	"whispering_woods": [
+		{"name": "Wooden Bow", "type": "weapon", "rarity": "common", "value": 8, "min_dmg": 3, "max_dmg": 6},
+		{"name": "Herb Bundle", "type": "consumable", "rarity": "uncommon", "value": 12, "heal": 35},
+		{"name": "Ancient Leaf", "type": "material", "rarity": "rare", "value": 25},
+		{"name": "Spider Silk", "type": "material", "rarity": "uncommon", "value": 8}
+	],
+	"default": [
+		{"name": "Scrap Metal", "type": "material", "rarity": "common", "value": 1},
+		{"name": "Old Coin", "type": "currency", "rarity": "common", "value": 5},
+		{"name": "Mystery Dust", "type": "material", "rarity": "common", "value": 1}
+	]
 }
 
-# ─── World State ──────────────────────────────────────────────────────────────
-
-var world: Dictionary = {
-	"current_area": "prologue",
-	"day": 1,
-	"time_of_day": "morning",
-	"faction_rep": {},
-	"discovered_areas": [],
-	"defeated_bosses": [],
+const RARITY_WEIGHTS = {
+	"common": 70,
+	"uncommon": 20,
+	"rare": 8,
+	"epic": 2
 }
 
-# ─── Story Flags ──────────────────────────────────────────────────────────────
+# ── Initialization ────────────────────────────────────────────────────────────
 
-var flags: Dictionary = {}
-
-
-# ─── Public API ───────────────────────────────────────────────────────────────
-
-func set_flag(key: String, value: Variant) -> void:
-	flags[key] = value
-	flag_set.emit(key, value)
+func _ready() -> void:
+	print("[LootSystem] Ready. Loaded %d regions." % LOOT_TABLES.size())
 
 
-func get_flag(key: String, default: Variant = null) -> Variant:
-	return flags.get(key, default)
+# ── Public API ────────────────────────────────────────────────────────────────
+
+## Generate a single item based on region and difficulty multiplier
+func generate_loot(region: String, difficulty: int = 1) -> Dictionary:
+	var table = LOOT_TABLES.get(region, LOOT_TABLES["default"])
+	if table.is_empty():
+		table = LOOT_TABLES["default"]
+	
+	# Pick random template
+	var template = table[randi() % table.size()]
+	
+	# Create instance
+	var item = template.duplicate()
+	item["id"] = "%s_%d_%d" % [item["name"].to_lower().replace(" ", "_"), Time.get_ticks_msec(), randi() % 9999]
+	item["quantity"] = max(1, randi_range(1, 1 + difficulty))
+	
+	# Apply difficulty scaling to value
+	if item.has("value"):
+		item["value"] = item["value"] * difficulty
+	
+	loot_generated.emit(item)
+	return item
 
 
-func has_flag(key: String) -> bool:
-	return flags.has(key)
+## Generate a stack of items (e.g., for chest rewards)
+func generate_loot_batch(region: String, count: int, difficulty: int = 1) -> Array[Dictionary]:
+	var batch: Array[Dictionary] = []
+	for i in range(count):
+		batch.append(generate_loot(region, difficulty))
+	return batch
 
 
-func add_xp(amount: int) -> void:
-	player.xp += amount
-	while player.xp >= player.xp_to_next:
-		_level_up()
-
-
-func _level_up() -> void:
-	var old_level: int = player.level
-	player.xp -= player.xp_to_next
-	player.level += 1
-	player.xp_to_next = int(player.xp_to_next * 1.4)
-	player.hp_max += 10 + player.vit
-	player.hp = player.hp_max
-	player.mp_max += 5 + player.int
-	player_level_changed.emit(old_level, player.level)
-
-
-func take_damage(amount: int) -> void:
-	player.hp = max(0, player.hp - amount)
-	if player.hp <= 0:
-		player.total_deaths += 1
-		player_died.emit()
-
-
-func heal(amount: int) -> void:
-	player.hp = min(player.hp_max, player.hp + amount)
-
-
-func add_entropy(amount: int) -> void:
-	player.entropy = min(player.entropy_max, player.entropy + amount)
-
-
-func reduce_entropy(amount: int) -> void:
-	player.entropy = max(0, player.entropy - amount)
-
-
-func add_item(item: Dictionary) -> void:
-	player.inventory.append(item)
-
-
-func remove_item(item_id: String) -> bool:
-	for i in range(player.inventory.size() - 1, -1, -1):
-		if player.inventory[i].get("id") == item_id:
-			player.inventory.remove_at(i)
-			return true
-	return false
-
-
-func set_faction_rep(faction: String, delta: int) -> void:
-	var current: int = world.faction_rep.get(faction, 0)
-	world.faction_rep[faction] = clamp(current + delta, -100, 100)
-
-
-func get_faction_rep(faction: String) -> int:
-	return world.faction_rep.get(faction, 0)
-
-
-# ─── Save / Load ──────────────────────────────────────────────────────────────
-
-func save() -> void:
-	var data: Dictionary = {
-		"version": VERSION,
-		"player": player,
-		"world": world,
-		"flags": flags,
+## Generate gold reward based on level
+func generate_gold_reward(level: int) -> Dictionary:
+	var base := level * 10
+	var variance := randi() % 20
+	var amount := base + variance
+	
+	return {
+		"name": "Gold",
+		"type": "currency",
+		"rarity": "common",
+		"value": 1,
+		"quantity": amount,
+		"id": "gold_%d" % Time.get_ticks_msec()
 	}
-	var file: FileAccess = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
-	if file:
-		file.store_string(JSON.stringify(data))
-		file.close()
-		game_saved.emit()
-	else:
-		push_error("[GameState] Could not open save file for writing.")
 
 
-func load_game() -> bool:
-	if not FileAccess.file_exists(SAVE_PATH):
-		return false
-	var file: FileAccess = FileAccess.open(SAVE_PATH, FileAccess.READ)
-	if not file:
-		push_error("[GameState] Could not open save file for reading.")
-		return false
-	var json: JSON = JSON.new()
-	var err: Error = json.parse(file.get_as_text())
-	file.close()
-	if err != OK:
-		push_error("[GameState] Save file corrupted.")
-		return false
-	var data: Dictionary = json.get_data() as Dictionary
-	if not data.is_empty():
-		_merge_player_data(data.get("player", {}))
-		_merge_world_data(data.get("world", {}))
-		flags = data.get("flags", {})
-	game_loaded.emit()
-	return true
-
-
-func _merge_player_data(data: Dictionary) -> void:
-	for key in data:
-		if player.has(key):
-			player[key] = data[key]
-
-
-func _merge_world_data(data: Dictionary) -> void:
-	for key in data:
-		if world.has(key):
-			if world[key] is Dictionary and data[key] is Dictionary:
-				world[key].merge(data[key], true)
-			else:
-				world[key] = data[key]
-
-
-func has_save() -> bool:
-	return FileAccess.file_exists(SAVE_PATH)
-
-
-func delete_save() -> void:
-	if FileAccess.file_exists(SAVE_PATH):
-		DirAccess.remove_absolute(SAVE_PATH)
-
-
-func reset() -> void:
-	player = {
-		"name": "Survivor",
-		"level": 1,
-		"xp": 0,
-		"xp_to_next": 100,
-		"hp": 100,
-		"hp_max": 100,
-		"mp": 50,
-		"mp_max": 50,
-		"str": 5,
-		"agi": 5,
-		"int": 5,
-		"vit": 5,
-		"entropy": 0,
-		"entropy_max": 100,
-		"gold": 0,
-		"inventory": [],
-		"equipped": {},
-		"skills": [],
-		"status_effects": [],
-		"location": "prologue",
-		"total_kills": 0,
-		"total_deaths": 0,
+## Get description from AI (if available)
+func get_item_description(item: Dictionary) -> String:
+	if not AIManager:
+		return "A mysterious item."
+	
+	var template_key = "loot_desc"
+	var params = {
+		"item_name": item.get("name", "Unknown"),
+		"tier": _calculate_tier(item.get("rarity", "common")),
+		"type": item.get("type", "misc")
 	}
-	world = {
-		"current_area": "prologue",
-		"day": 1,
-		"time_of_day": "morning",
-		"faction_rep": {},
-		"discovered_areas": [],
-		"defeated_bosses": [],
-	}
-	flags.clear()
+	
+	return AIManager.ask_template(template_key, params)
+
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
+
+func _calculate_tier(rarity: String) -> int:
+	match rarity:
+		"common": return 1
+		"uncommon": return 2
+		"rare": return 3
+		"epic": return 4
+		"legendary": return 5
+		_: return 1
+
+
+func _get_rarity_by_weight() -> String:
+	var roll := randi() % 100
+	var cumulative := 0
+	
+	for rarity in ["common", "uncommon", "rare", "epic"]:
+		cumulative += RARITY_WEIGHTS[rarity]
+		if roll < cumulative:
+			return rarity
+	
+	return "common"
