@@ -19,10 +19,10 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-AiManager="*uid://dcmuy3e8dk7ql"
 GameState="*res://scripts/globals/game_state.gd"
 AIManager="*res://scripts/ai/ai_manager.gd"
 CombatManager="*res://scripts/system/combat_manager.gd"
+LootSystem="*uid://bn57m8mg7skco"
 
 [display]
 
@@ -32,7 +32,7 @@ window/stretch/mode="canvas_items"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/ai_assistant_hub/plugin.cfg")
+enabled=PackedStringArray()
 
 [input]
 

@@ -1,63 +1,228 @@
 extends Node
 
-## LootSystem — generates item drops, assigns IDs, feeds into inventory
-## Autoload as "LootSystem"
+## GameState — Autoload singleton
+## Holds all persistent game data: player, world state, flags, progress
+## Saves/loads to disk automatically with optimized serialization
 
-signal loot_dropped(items: Array)
+signal player_level_changed(old_level: int, new_level: int)
+signal player_died
+signal game_saved
+signal game_loaded
+signal flag_set(flag_name: String, value: Variant)
 
-# Item pool by tier
-const ITEM_POOL := {
-	1: [
-		{"id": "bandage", "name": "Torn Bandage", "type": "consumable",
-			"slot": "", "tier": 1, "effect": "heal", "value": 20},
-		{"id": "scrap_metal", "name": "Scrap Metal", "type": "misc",
-			"slot": "", "tier": 1},
-		{"id": "rust_blade", "name": "Rust Blade", "type": "weapon",
-			"slot": "weapon", "tier": 1, "str_bonus": 2},
-	],
-	2: [
-		{"id": "stimpack", "name": "Stimpack", "type": "consumable",
-			"slot": "", "tier": 2, "effect": "heal", "value": 40},
-		{"id": "entropy_shard", "name": "Entropy Shard", "type": "consumable",
-			"slot": "", "tier": 2, "effect": "reduce_entropy", "value": 20},
-		{"id": "iron_plate", "name": "Iron Plate Armor", "type": "armor",
-			"slot": "armor", "tier": 2, "def_bonus": 3},
-		{"id": "cold_iron_blade", "name": "Cold Iron Blade", "type": "weapon",
-			"slot": "weapon", "tier": 2, "str_bonus": 4},
-	],
-	3: [
-		{"id": "focus_capsule", "name": "Focus Capsule", "type": "consumable",
-			"slot": "", "tier": 3, "effect": "restore_mp", "value": 30},
-		{"id": "ridged_greaves", "name": "Ridged Greaves", "type": "armor",
-			"slot": "legs", "tier": 3, "def_bonus": 4},
-		{"id": "entropy_lens", "name": "Entropy Lens", "type": "accessory",
-			"slot": "accessory", "tier": 3},
-	],
+const SAVE_PATH: String = "user://save_data.json"
+const VERSION: String = "1.0.0"
+
+# ─── Player Data ──────────────────────────────────────────────────────────────
+
+var player: Dictionary = {
+	"name": "Survivor",
+	"level": 1,
+	"xp": 0,
+	"xp_to_next": 100,
+	"hp": 100,
+	"hp_max": 100,
+	"mp": 50,
+	"mp_max": 50,
+	"str": 5,
+	"agi": 5,
+	"int": 5,
+	"vit": 5,
+	"entropy": 0,
+	"entropy_max": 100,
+	"gold": 0,
+	"inventory": [],
+	"equipped": {},
+	"skills": [],
+	"status_effects": [],
+	"location": "prologue",
+	"total_kills": 0,
+	"total_deaths": 0,
 }
 
+# ─── World State ──────────────────────────────────────────────────────────────
 
-func generate_drops(enemy_level: int, enemy_faction: String) -> Array:
-	var drops: Array = []
-	var tier: int = clamp(ceili(enemy_level / 2.0), 1, 3)
-	# ~40% chance of a drop
-	if randf() > 0.40:
-		return drops
-	var pool: Array = ITEM_POOL.get(tier, [])
-	if pool.is_empty():
-		return drops
-	var item: Dictionary = pool[randi() % pool.size()].duplicate()
-	# Give it a unique runtime ID to avoid inventory collisions
-	item["id"] = "%s_%d" % [item["id"], Time.get_ticks_msec()]
-	drops.append(item)
-	# Small chance of bonus drop
-	if randf() < 0.15 and pool.size() > 1:
-		var bonus: Dictionary = pool[randi() % pool.size()].duplicate()
-		bonus["id"] = "%s_%d" % [bonus["id"], Time.get_ticks_msec() + 1]
-		drops.append(bonus)
-	loot_dropped.emit(drops)
-	return drops
+var world: Dictionary = {
+	"current_area": "prologue",
+	"day": 1,
+	"time_of_day": "morning",
+	"faction_rep": {},
+	"discovered_areas": [],
+	"defeated_bosses": [],
+}
+
+# ─── Story Flags ──────────────────────────────────────────────────────────────
+
+var flags: Dictionary = {}
 
 
-func add_drops_to_inventory(drops: Array) -> void:
-	for item in drops:
-		GameState.add_item(item)
+# ─── Public API ───────────────────────────────────────────────────────────────
+
+func set_flag(key: String, value: Variant) -> void:
+	flags[key] = value
+	flag_set.emit(key, value)
+
+
+func get_flag(key: String, default: Variant = null) -> Variant:
+	return flags.get(key, default)
+
+
+func has_flag(key: String) -> bool:
+	return flags.has(key)
+
+
+func add_xp(amount: int) -> void:
+	player.xp += amount
+	while player.xp >= player.xp_to_next:
+		_level_up()
+
+
+func _level_up() -> void:
+	var old_level: int = player.level
+	player.xp -= player.xp_to_next
+	player.level += 1
+	player.xp_to_next = int(player.xp_to_next * 1.4)
+	player.hp_max += 10 + player.vit
+	player.hp = player.hp_max
+	player.mp_max += 5 + player.int
+	player_level_changed.emit(old_level, player.level)
+
+
+func take_damage(amount: int) -> void:
+	player.hp = max(0, player.hp - amount)
+	if player.hp <= 0:
+		player.total_deaths += 1
+		player_died.emit()
+
+
+func heal(amount: int) -> void:
+	player.hp = min(player.hp_max, player.hp + amount)
+
+
+func add_entropy(amount: int) -> void:
+	player.entropy = min(player.entropy_max, player.entropy + amount)
+
+
+func reduce_entropy(amount: int) -> void:
+	player.entropy = max(0, player.entropy - amount)
+
+
+func add_item(item: Dictionary) -> void:
+	player.inventory.append(item)
+
+
+func remove_item(item_id: String) -> bool:
+	for i in range(player.inventory.size() - 1, -1, -1):
+		if player.inventory[i].get("id") == item_id:
+			player.inventory.remove_at(i)
+			return true
+	return false
+
+
+func set_faction_rep(faction: String, delta: int) -> void:
+	var current: int = world.faction_rep.get(faction, 0)
+	world.faction_rep[faction] = clamp(current + delta, -100, 100)
+
+
+func get_faction_rep(faction: String) -> int:
+	return world.faction_rep.get(faction, 0)
+
+
+# ─── Save / Load ──────────────────────────────────────────────────────────────
+
+func save() -> void:
+	var data: Dictionary = {
+		"version": VERSION,
+		"player": player,
+		"world": world,
+		"flags": flags,
+	}
+	var file: FileAccess = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify(data))
+		file.close()
+		game_saved.emit()
+	else:
+		push_error("[GameState] Could not open save file for writing.")
+
+
+func load_game() -> bool:
+	if not FileAccess.file_exists(SAVE_PATH):
+		return false
+	var file: FileAccess = FileAccess.open(SAVE_PATH, FileAccess.READ)
+	if not file:
+		push_error("[GameState] Could not open save file for reading.")
+		return false
+	var json: JSON = JSON.new()
+	var err: Error = json.parse(file.get_as_text())
+	file.close()
+	if err != OK:
+		push_error("[GameState] Save file corrupted.")
+		return false
+	var data: Dictionary = json.get_data() as Dictionary
+	if not data.is_empty():
+		_merge_player_data(data.get("player", {}))
+		_merge_world_data(data.get("world", {}))
+		flags = data.get("flags", {})
+	game_loaded.emit()
+	return true
+
+
+func _merge_player_data(data: Dictionary) -> void:
+	for key in data:
+		if player.has(key):
+			player[key] = data[key]
+
+
+func _merge_world_data(data: Dictionary) -> void:
+	for key in data:
+		if world.has(key):
+			if world[key] is Dictionary and data[key] is Dictionary:
+				world[key].merge(data[key], true)
+			else:
+				world[key] = data[key]
+
+
+func has_save() -> bool:
+	return FileAccess.file_exists(SAVE_PATH)
+
+
+func delete_save() -> void:
+	if FileAccess.file_exists(SAVE_PATH):
+		DirAccess.remove_absolute(SAVE_PATH)
+
+
+func reset() -> void:
+	player = {
+		"name": "Survivor",
+		"level": 1,
+		"xp": 0,
+		"xp_to_next": 100,
+		"hp": 100,
+		"hp_max": 100,
+		"mp": 50,
+		"mp_max": 50,
+		"str": 5,
+		"agi": 5,
+		"int": 5,
+		"vit": 5,
+		"entropy": 0,
+		"entropy_max": 100,
+		"gold": 0,
+		"inventory": [],
+		"equipped": {},
+		"skills": [],
+		"status_effects": [],
+		"location": "prologue",
+		"total_kills": 0,
+		"total_deaths": 0,
+	}
+	world = {
+		"current_area": "prologue",
+		"day": 1,
+		"time_of_day": "morning",
+		"faction_rep": {},
+		"discovered_areas": [],
+		"defeated_bosses": [],
+	}
+	flags.clear()

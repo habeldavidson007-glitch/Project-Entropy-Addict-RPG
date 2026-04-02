@@ -1,0 +1,165 @@
+[gd_scene format=3 uid="uid://combat_ui_scene"]
+
+[ext_resource type="Script" path="res://scripts/ui/combat_ui.gd" id="1_combatui"]
+
+[node name="CombatUI" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_combatui")
+
+[node name="BG" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.06, 0.06, 0.09, 1)
+
+[node name="Margin" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+
+[node name="TopBar" type="HBoxContainer" parent="Margin/VBox"]
+layout_mode = 2
+
+[node name="RoundLabel" type="Label" parent="Margin/VBox/TopBar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Round 1"
+theme_override_font_sizes/font_size = 14
+
+[node name="TurnSpacer" type="Control" parent="Margin/VBox/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TurnLabel" type="Label" parent="Margin/VBox/TopBar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Your turn"
+theme_override_font_sizes/font_size = 14
+
+[node name="HSep0" type="HSeparator" parent="Margin/VBox"]
+layout_mode = 2
+
+[node name="BattleArea" type="HSplitContainer" parent="Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+split_offset = 560
+
+[node name="LeftSide" type="VBoxContainer" parent="Margin/VBox/BattleArea"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PlayerPanel" type="PanelContainer" parent="Margin/VBox/BattleArea/LeftSide"]
+layout_mode = 2
+
+[node name="PlayerVBox" type="VBoxContainer" parent="Margin/VBox/BattleArea/LeftSide/PlayerPanel"]
+layout_mode = 2
+
+[node name="PlayerNameLabel" type="Label" parent="Margin/VBox/BattleArea/LeftSide/PlayerPanel/PlayerVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Survivor  Lv.1"
+theme_override_font_sizes/font_size = 15
+
+[node name="PlayerHPBar" type="ProgressBar" parent="Margin/VBox/BattleArea/LeftSide/PlayerPanel/PlayerVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 18)
+value = 100.0
+
+[node name="PlayerHPLabel" type="Label" parent="Margin/VBox/BattleArea/LeftSide/PlayerPanel/PlayerVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "100/100 HP"
+theme_override_font_sizes/font_size = 11
+
+[node name="PlayerMPLabel" type="Label" parent="Margin/VBox/BattleArea/LeftSide/PlayerPanel/PlayerVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "50/50 MP"
+theme_override_font_sizes/font_size = 11
+
+[node name="PlayerEntropyBar" type="ProgressBar" parent="Margin/VBox/BattleArea/LeftSide/PlayerPanel/PlayerVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 10)
+value = 0.0
+
+[node name="NarrationLabel" type="RichTextLabel" parent="Margin/VBox/BattleArea/LeftSide"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+text = ""
+theme_override_font_sizes/normal_font_size = 12
+
+[node name="WaitingLabel" type="Label" parent="Margin/VBox/BattleArea/LeftSide"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Enemy acting..."
+theme_override_font_sizes/font_size = 12
+modulate = Color(0.7, 0.7, 0.7, 1)
+visible = false
+
+[node name="RightSide" type="VBoxContainer" parent="Margin/VBox/BattleArea"]
+layout_mode = 2
+custom_minimum_size = Vector2(280, 0)
+
+[node name="EnemiesTitle" type="Label" parent="Margin/VBox/BattleArea/RightSide"]
+layout_mode = 2
+text = "ENEMIES"
+theme_override_font_sizes/font_size = 11
+
+[node name="EnemyContainer" type="VBoxContainer" parent="Margin/VBox/BattleArea/RightSide"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HSep1" type="HSeparator" parent="Margin/VBox"]
+layout_mode = 2
+
+[node name="SkillContainer" type="HBoxContainer" parent="Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 70)
+
+[node name="ResultOverlay" type="Panel" parent="."]
+unique_name_in_owner = true
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -120.0
+offset_right = 200.0
+offset_bottom = 120.0
+visible = false
+
+[node name="ResultVBox" type="VBoxContainer" parent="ResultOverlay"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="ResultLabel" type="Label" parent="ResultOverlay/ResultVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_alignment = 1
+vertical_alignment = 1
+text = "SURVIVED"
+theme_override_font_sizes/font_size = 28
+
+[node name="ResultButton" type="Button" parent="ResultOverlay/ResultVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 44)
+text = "Continue"

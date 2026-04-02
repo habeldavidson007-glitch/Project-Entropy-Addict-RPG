@@ -1,0 +1,78 @@
+[gd_scene format=3 uid="uid://main_menu_scene"]
+
+[ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_menu"]
+
+[node name="MainMenu" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_menu")
+
+[node name="Background" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.05, 0.05, 0.07, 1)
+
+[node name="CenterContainer" type="VBoxContainer" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -180.0
+offset_top = -200.0
+offset_right = 180.0
+offset_bottom = 200.0
+alignment = 1
+
+[node name="TitleLabel" type="Label" parent="CenterContainer"]
+layout_mode = 2
+horizontal_alignment = 1
+text = "ENTROPY ADDICT"
+theme_override_font_sizes/font_size = 36
+
+[node name="TaglineLabel" type="Label" parent="CenterContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+text = "The world didn't end with fire."
+theme_override_font_sizes/font_size = 13
+modulate = Color(0.7, 0.7, 0.7, 1)
+
+[node name="Spacer" type="Control" parent="CenterContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
+
+[node name="NewGameButton" type="Button" parent="CenterContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(240, 44)
+text = "New Game"
+
+[node name="ContinueButton" type="Button" parent="CenterContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(240, 44)
+text = "Continue"
+
+[node name="QuitButton" type="Button" parent="CenterContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(240, 44)
+text = "Quit"
+
+[node name="VersionLabel" type="Label" parent="."]
+unique_name_in_owner = true
+anchors_preset = 4
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 0.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -24.0
+offset_right = 120.0
+offset_bottom = -4.0
+text = "v1.0.0"
+theme_override_font_sizes/font_size = 11
+modulate = Color(0.5, 0.5, 0.5, 1)

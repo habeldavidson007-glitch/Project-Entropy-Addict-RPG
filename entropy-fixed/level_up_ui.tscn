@@ -1,0 +1,81 @@
+[gd_scene format=3 uid="uid://level_up_scene"]
+
+[ext_resource type="Script" path="res://scripts/ui/level_up_ui.gd" id="1_lvlup"]
+
+[node name="LevelUpUI" type="CanvasLayer"]
+script = ExtResource("1_lvlup")
+
+[node name="Overlay" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.65)
+
+[node name="Panel" type="PanelContainer" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = -220.0
+offset_right = 220.0
+offset_bottom = 220.0
+
+[node name="VBox" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+
+[node name="LevelLabel" type="Label" parent="Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+text = "LEVEL UP"
+theme_override_font_sizes/font_size = 28
+
+[node name="GainsLabel" type="Label" parent="Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+text = "+10 HP max  ·  +5 MP max"
+theme_override_font_sizes/font_size = 13
+
+[node name="Sep" type="HSeparator" parent="Panel/VBox"]
+layout_mode = 2
+
+[node name="FlavourLabel" type="Label" parent="Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 3
+text = ""
+theme_override_font_sizes/font_size = 12
+modulate = Color(0.75, 0.75, 0.75, 1)
+custom_minimum_size = Vector2(0, 40)
+
+[node name="LoadingLabel" type="Label" parent="Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+text = "..."
+theme_override_font_sizes/font_size = 12
+
+[node name="Sep2" type="HSeparator" parent="Panel/VBox"]
+layout_mode = 2
+
+[node name="SkillTitle" type="Label" parent="Panel/VBox"]
+layout_mode = 2
+text = "CHOOSE A SKILL"
+theme_override_font_sizes/font_size = 11
+
+[node name="SkillBox" type="VBoxContainer" parent="Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Spacer" type="Control" parent="Panel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CloseButton" type="Button" parent="Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
+text = "Continue"

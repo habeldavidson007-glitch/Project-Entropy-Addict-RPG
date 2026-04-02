@@ -1,0 +1,199 @@
+[gd_scene format=3 uid="uid://char_creation_scene"]
+
+[ext_resource type="Script" path="res://scripts/ui/character_creation.gd" id="1_cc"]
+
+[node name="CharacterCreation" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_cc")
+
+[node name="BG" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.05, 0.05, 0.08, 1)
+
+[node name="Center" type="VBoxContainer" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -280.0
+offset_top = -300.0
+offset_right = 280.0
+offset_bottom = 300.0
+alignment = 1
+
+[node name="Title" type="Label" parent="Center"]
+layout_mode = 2
+horizontal_alignment = 1
+text = "WHO ARE YOU"
+theme_override_font_sizes/font_size = 24
+
+[node name="Spacer0" type="Control" parent="Center"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 16)
+
+[node name="NameRow" type="HBoxContainer" parent="Center"]
+layout_mode = 2
+
+[node name="NameLbl" type="Label" parent="Center/NameRow"]
+layout_mode = 2
+text = "Name: "
+theme_override_font_sizes/font_size = 14
+
+[node name="NameInput" type="LineEdit" parent="Center/NameRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Enter your name"
+theme_override_font_sizes/font_size = 14
+
+[node name="FlavourLabel" type="Label" parent="Center"]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 3
+text = ""
+theme_override_font_sizes/font_size = 12
+modulate = Color(0.7, 0.7, 0.7, 1)
+custom_minimum_size = Vector2(0, 36)
+
+[node name="LoadingLabel" type="Label" parent="Center"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "..."
+theme_override_font_sizes/font_size = 12
+visible = false
+
+[node name="Spacer1" type="Control" parent="Center"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 12)
+
+[node name="PointsLabel" type="Label" parent="Center"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+text = "Points: 15"
+theme_override_font_sizes/font_size = 14
+
+[node name="StatsGrid" type="GridContainer" parent="Center"]
+layout_mode = 2
+columns = 4
+
+[node name="StrLabel" type="Label" parent="Center/StatsGrid"]
+layout_mode = 2
+text = "Strength"
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 13
+
+[node name="StrDec" type="Button" parent="Center/StatsGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "−"
+custom_minimum_size = Vector2(32, 32)
+
+[node name="StrValue" type="Label" parent="Center/StatsGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+text = "3"
+custom_minimum_size = Vector2(28, 0)
+theme_override_font_sizes/font_size = 14
+
+[node name="StrInc" type="Button" parent="Center/StatsGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "+"
+custom_minimum_size = Vector2(32, 32)
+
+[node name="AgiLabel" type="Label" parent="Center/StatsGrid"]
+layout_mode = 2
+text = "Agility"
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 13
+
+[node name="AgiDec" type="Button" parent="Center/StatsGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "−"
+custom_minimum_size = Vector2(32, 32)
+
+[node name="AgiValue" type="Label" parent="Center/StatsGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+text = "3"
+custom_minimum_size = Vector2(28, 0)
+theme_override_font_sizes/font_size = 14
+
+[node name="AgiInc" type="Button" parent="Center/StatsGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "+"
+custom_minimum_size = Vector2(32, 32)
+
+[node name="IntLabel" type="Label" parent="Center/StatsGrid"]
+layout_mode = 2
+text = "Intellect"
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 13
+
+[node name="IntDec" type="Button" parent="Center/StatsGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "−"
+custom_minimum_size = Vector2(32, 32)
+
+[node name="IntValue" type="Label" parent="Center/StatsGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+text = "3"
+custom_minimum_size = Vector2(28, 0)
+theme_override_font_sizes/font_size = 14
+
+[node name="IntInc" type="Button" parent="Center/StatsGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "+"
+custom_minimum_size = Vector2(32, 32)
+
+[node name="VitLabel" type="Label" parent="Center/StatsGrid"]
+layout_mode = 2
+text = "Vitality"
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 13
+
+[node name="VitDec" type="Button" parent="Center/StatsGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "−"
+custom_minimum_size = Vector2(32, 32)
+
+[node name="VitValue" type="Label" parent="Center/StatsGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+text = "3"
+custom_minimum_size = Vector2(28, 0)
+theme_override_font_sizes/font_size = 14
+
+[node name="VitInc" type="Button" parent="Center/StatsGrid"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "+"
+custom_minimum_size = Vector2(32, 32)
+
+[node name="Spacer2" type="Control" parent="Center"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 20)
+
+[node name="ConfirmButton" type="Button" parent="Center"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 48)
+text = "Begin"
+disabled = true
+theme_override_font_sizes/font_size = 16

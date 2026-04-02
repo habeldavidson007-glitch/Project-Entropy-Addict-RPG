@@ -1,4 +1,5 @@
 extends Node
+class_name AIManagerClass
 
 ## AIManager — Autoload singleton
 ## Queued, cached, retry-safe Ollama/Qwen interface for Entropy Addict RPG
@@ -12,7 +13,7 @@ const MODEL_NAME    : String = "qwen2.5-coder:3b"
 const MAX_TOKENS    : int    = 80
 const TEMPERATURE   : float  = 0.7
 const TOP_P         : float  = 0.9
-const REQUEST_TIMEOUT: float = 45.0
+const REQUEST_TIMEOUT: float = 45.0   # 3b model needs time – was 5.0 (too short)
 const MAX_RETRIES   : int    = 2
 
 var _request_queue  : Array[Dictionary] = []
@@ -40,6 +41,7 @@ func is_busy() -> bool:
 func ask(prompt: String, req_id: String = "") -> String:
 	if req_id.is_empty():
 		req_id = "req_%d_%d" % [Time.get_ticks_msec(), randi() % 9999]
+	# Cache hit — emit immediately next frame so callers can connect first
 	if _response_cache.has(req_id):
 		_defer_emit(req_id, _response_cache[req_id])
 		return req_id
@@ -47,8 +49,8 @@ func ask(prompt: String, req_id: String = "") -> String:
 	return req_id
 
 
-func describe_enemy(enemy_name: String, level: int, faction: String, region: String) -> String:
-	var id := "enemy_%s_%d" % [enemy_name.to_lower().replace(" ", "_"), level]
+func describe_enemy(name: String, level: int, faction: String, region: String) -> String:
+	var id := "enemy_%s_%d" % [name.to_lower().replace(" ", "_"), level]
 	if _response_cache.has(id):
 		_defer_emit(id, _response_cache[id])
 		return id
@@ -56,7 +58,7 @@ func describe_enemy(enemy_name: String, level: int, faction: String, region: Str
 		"Dark survival RPG narrator. One sentence, max 20 words, cold and gritty.\n"
 		+ "Describe enemy '%s' Level %d, Faction: %s, Region: %s.\n"
 		+ "Output ONLY the description. No quotes."
-	) % [enemy_name, level, faction, region]
+	) % [name, level, faction, region]
 	_enqueue(id, prompt)
 	return id
 
@@ -120,6 +122,7 @@ func ask_template(template_key: String, params: Dictionary, req_id: String = "")
 	if _response_cache.has(req_id):
 		_defer_emit(req_id, _response_cache[req_id])
 		return req_id
+	# Build prompt inline — no file I/O required
 	var prompt := _build_inline_template(template_key, params)
 	_enqueue(req_id, prompt)
 	return req_id
@@ -209,7 +212,7 @@ func _fail(reason: String) -> void:
 		_active_request["retries"] = retries + 1
 		var saved := _active_request.duplicate()
 		_active_request = {}
-		_request_queue.push_front(saved)
+		_request_queue.push_front(saved)   # push AFTER clearing active — fixes double-pop bug
 		_is_busy = false
 		_process_next()
 		return
@@ -220,6 +223,7 @@ func _fail(reason: String) -> void:
 
 
 func _defer_emit(id: String, text: String) -> void:
+	# Deferred so callers have time to connect signals before emit fires
 	call_deferred("_do_emit", id, text)
 
 
