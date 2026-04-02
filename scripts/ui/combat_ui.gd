@@ -50,7 +50,7 @@ func _build_enemy_display(enemies: Array) -> void:
 	_enemy_hp_bars.clear()
 	_living_enemies.clear()
 	for i in enemies.size():
-		var enemy := enemies[i]
+		var enemy: Dictionary = enemies[i]
 		_living_enemies.append(enemy)
 		var row := VBoxContainer.new()
 		var name_lbl := Label.new()
@@ -112,7 +112,7 @@ func _build_skill_buttons() -> void:
 
 
 func _refresh_player_display() -> void:
-	var p := GameState.player
+	var p: Dictionary = GameState.player
 	player_name_label.text = "%s  Lv.%d" % [p["name"], p["level"]]
 	player_hp_bar.value = float(p["hp"]) / float(p["hp_max"]) * 100.0
 	player_hp_label.text = "%d/%d HP" % [p["hp"], p["hp_max"]]

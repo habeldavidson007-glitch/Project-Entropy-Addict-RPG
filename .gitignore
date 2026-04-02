@@ -1,32 +1,10 @@
-# Godot 4 — auto-generated temp files
-.godot/
-*.translation
-
-# Import metadata (regenerated on project open)
+```
+# Godot-specific ignores
 *.import
-
-# Export configs and output
-export.cfg
+*.uid
 export_presets.cfg
-exports/
-
-# Cached AI responses (runtime only)
-cache/
-
-# OS junk
-.DS_Store
-Thumbs.db
-desktop.ini
-
-# Editor backups
-*.bak
-*.swp
-*~
-
-# Python (if any tooling)
-__pycache__/
-*.pyc
-*.pyo
-
-# Logs
-*.log
+.rsync-filter
+GodotSharp/
+mono_crash.*
+user://*
+```

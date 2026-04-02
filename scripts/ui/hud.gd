@@ -30,7 +30,7 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	# Sync live values every frame (HP can change mid-combat)
-	var p := GameState.player
+	var p: Dictionary = GameState.player
 	hp_bar.value = float(p["hp"]) / float(p["hp_max"]) * 100.0
 	mp_bar.value = float(p["mp"]) / float(p["mp_max"]) * 100.0
 	var entropy_ratio: float = float(p["entropy"]) / float(p["entropy_max"])
@@ -46,7 +46,7 @@ func _process(_delta: float) -> void:
 
 
 func refresh() -> void:
-	var p := GameState.player
+	var p: Dictionary = GameState.player
 	level_label.text = "LV %d" % p["level"]
 	gold_label.text = "%d G" % p["gold"]
 
@@ -70,6 +70,6 @@ func _fade_narration() -> void:
 func _on_damage(_attacker: Dictionary, _target: Dictionary, amount: int, skill: String) -> void:
 	# Flash the HP bar red briefly on player damage
 	if _attacker.get("team", "") == "enemy":
-		var t := create_tween()
+		var t: Tween = create_tween()
 		t.tween_property(hp_bar, "modulate", Color(1, 0.3, 0.3), 0.1)
 		t.tween_property(hp_bar, "modulate", Color.WHITE, 0.3)
